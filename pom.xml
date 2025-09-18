@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.4.5</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>tw.fengqing.spring.springbucks</groupId>
+	<artifactId>scheduled-customer-service</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>scheduled-ccustomer-service</name>
+	<description>Demo project for Spring Boot</description>
+
+	<properties>
+		<java.version>21</java.version>
+		<spring-cloud.version>2024.0.2</spring-cloud.version>
+		<!-- 自定義依賴版本管理 -->
+		<joda-money.version>2.0.2</joda-money.version>
+		<commons-lang3.version>3.14.0</commons-lang3.version>
+		<vavr.version>0.10.4</vavr.version>
+		<aspectj.version>1.9.22</aspectj.version>
+	</properties>
+
+	<dependencies>
+			<!-- Spring Cloud Bootstrap 啟動器 - 版本由 Spring Cloud 管理 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
+		</dependency>
+		
+		<!-- Resilience4j - 熔斷器、重試、限流等功能，版本在 dependencyManagement 中管理 -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot3</artifactId>
+		</dependency>
+
+		<!-- Spring Boot 核心依賴 - 使用 Spring Boot 預設版本 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		
+		<!-- Spring Cloud 依賴 - 使用 Spring Cloud 預設版本 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-consul-discovery</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
+		
+		<!-- OpenFeign HTTP 客戶端 - 使用 Spring Cloud 預設版本 -->
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-httpclient</artifactId>
+		</dependency>
+
+		<!-- Joda Money - 用於貨幣處理，版本在 dependencyManagement 中管理 -->
+		<dependency>
+			<groupId>org.joda</groupId>
+			<artifactId>joda-money</artifactId>
+		</dependency>
+
+		<!-- Apache Commons Lang3 - 工具類庫，版本在 dependencyManagement 中管理 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<!-- Vavr - 函數式程式設計工具庫，版本在 dependencyManagement 中管理 -->
+		<dependency>
+			<groupId>io.vavr</groupId>
+			<artifactId>vavr</artifactId>
+		</dependency>
+
+		<!-- AspectJ - AOP 支援，版本在 dependencyManagement 中管理 -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+		</dependency>
+
+		<!-- Apache HttpClient5 - 使用 Spring Boot 預設版本 -->
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+		</dependency>
+
+		<!-- Lombok - 程式碼生成工具，使用 Spring Boot 預設版本 -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		
+		<!-- Spring Boot 測試依賴 - 使用 Spring Boot 預設版本 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Spring Cloud 依賴管理 -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			
+			<!-- 自定義依賴版本管理 -->
+			<!-- Joda Money - 覆蓋 Spring Boot 預設版本，使用穩定版本 1.0.1 -->
+			<dependency>
+				<groupId>org.joda</groupId>
+				<artifactId>joda-money</artifactId>
+				<version>${joda-money.version}</version>
+			</dependency>
+			
+			<!-- Apache Commons Lang3 - 覆蓋 Spring Boot 預設版本，使用最新穩定版本 -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3.version}</version>
+			</dependency>
+			
+			<!-- Vavr - 函數式程式設計工具庫 -->
+			<dependency>
+				<groupId>io.vavr</groupId>
+				<artifactId>vavr</artifactId>
+				<version>${vavr.version}</version>
+			</dependency>
+			
+			<!-- AspectJ - AOP 支援 -->
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjweaver</artifactId>
+				<version>${aspectj.version}</version>
+			</dependency>
+			
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
