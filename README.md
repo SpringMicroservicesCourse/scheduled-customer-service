@@ -1,304 +1,191 @@
-# Spring Cloud Stream 微服務架構實戰 ⚡
+# scheduled-customer-service
 
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
+> SpringBucks customer service with scheduled monitoring, circuit breaker, and bulkhead patterns
+
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2024.0.2-blue.svg)](https://spring.io/projects/spring-cloud)
-[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-3.x-black.svg)](https://kafka.apache.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/)
+[![Resilience4j](https://img.shields.io/badge/Resilience4j-2.x-blue.svg)](https://resilience4j.readme.io/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 專案介紹
+A sophisticated customer service demonstrating Spring Task Scheduling, Application Event mechanism, OpenFeign integration, and Resilience4j patterns (Circuit Breaker & Bulkhead) for robust microservice communication.
 
-本專案展示如何使用 **Spring Cloud Stream** 結合 **Apache Kafka** 建構一個完整的微服務架構系統，模擬咖啡店訂單處理流程。透過事件驅動架構實現服務間的解耦與非同步通訊。
+## Features
 
-### 核心功能
-- **訂單管理系統**：完整的咖啡訂單生命週期管理
-- **事件驅動架構**：使用 Kafka 實現服務間非同步通訊
-- **定時任務處理**：自動化訂單狀態監控與處理
-- **服務熔斷與限流**：使用 Resilience4j 提供系統穩定性保障
+- **Scheduled Task Monitoring** with `@Scheduled` annotation
+- **Application Event Mechanism** for internal decoupling
+- **OpenFeign** declarative HTTP client
+- **Circuit Breaker Pattern** with Resilience4j
+- **Bulkhead Pattern** for concurrency control
+- **Service Discovery** with Consul
+- **Custom HTTP Client Configuration** with connection pooling
+- **Automatic Order Pickup** via polling mechanism
+- **Event-Driven Workflow** with `ApplicationEventPublisher`
 
-### 解決問題
-- 微服務間的高效通訊機制
-- 事件驅動架構的實際應用
-- 分散式系統的可靠性設計
-- 非同步處理與狀態管理
+## Tech Stack
 
-> 💡 **為什麼選擇此架構？**
-> - **高可用性**：事件驅動架構提供更好的容錯能力
-> - **可擴展性**：微服務架構支援水平擴展
-> - **解耦合**：服務間透過事件通訊，降低依賴關係
-> - **實時性**：非同步處理提供更好的響應速度
+- **Spring Boot** 3.4.5
+- **Spring Cloud** 2024.0.2
+- **OpenFeign** for HTTP communication
+- **Resilience4j** for resilience patterns
+- **Consul** for service discovery
+- **Joda Money** 2.0.2 for money handling
+- **Apache HttpClient 5** for connection management
+- **Vavr** 0.10.4 for functional programming
+- **Lombok** for boilerplate reduction
+- **Maven** 3.8+
 
-### 🎯 專案特色
+## Getting Started
 
-- **完整的咖啡店業務流程**：從下單到取餐的完整生命週期
-- **多種通訊模式**：同步 REST API + 非同步事件驅動
-- **智能定時任務**：自動監控訂單狀態並執行相應動作
-- **企業級穩定性**：整合熔斷器、限流器、健康檢查等機制
+### Prerequisites
 
-## 技術棧
+- **JDK 21** or higher
+- **Maven 3.8+** (or use included Maven Wrapper)
+- **Running Consul** (port 8500)
+- **Running kafka-waiter-service** (port 8080)
+- **Running kafka-barista-service** (port 8070)
 
-### 核心框架
-- **Spring Boot 3.4.5** - 微服務基礎框架
-- **Spring Cloud Stream 2024.0.2** - 事件驅動架構支援
-- **Apache Kafka** - 分散式事件流平台
-- **Spring Data JPA** - 資料持久化層
+### Installation & Run
 
-### 開發工具與輔助
-- **Resilience4j** - 熔斷器、限流器、隔離器
-- **OpenFeign** - 服務間 HTTP 通訊
-- **Consul** - 服務註冊與發現
-- **MariaDB** - 關聯式資料庫
-- **Docker Compose** - 容器化部署
-
-## 專案結構
-
-```
-Chapter 15 Spring Cloud Stream/
-├── kafka-barista-service/          # 咖啡師服務
-│   ├── src/main/java/
-│   │   └── tw/fengqing/spring/springbucks/barista/
-│   │       ├── integration/        # 事件監聽器
-│   │       ├── model/             # 資料模型
-│   │       └── repository/        # 資料存取層
-│   └── src/main/resources/
-│       └── application.properties
-├── kafka-waiter-service/           # 服務生服務
-│   ├── src/main/java/
-│   │   └── tw/fengqing/spring/springbucks/waiter/
-│   │       ├── controller/        # REST API 控制器
-│   │       ├── integration/       # 事件監聽器
-│   │       ├── model/            # 資料模型
-│   │       ├── service/          # 業務邏輯層
-│   │       └── support/          # 輔助工具類
-│   ├── src/main/resources/
-│   │   ├── application.properties
-│   │   ├── schema.sql            # 資料庫結構
-│   │   └── data.sql             # 初始資料
-│   └── docker-compose.yml       # Kafka 環境配置
-└── scheduled-customer-service/    # 客戶服務
-    ├── src/main/java/
-    │   └── tw/fengqing/spring/springbucks/customer/
-    │       ├── controller/       # REST API 控制器
-    │       ├── integration/      # Feign 客戶端
-    │       ├── model/           # 資料模型
-    │       ├── scheduler/       # 定時任務
-    │       └── support/         # 輔助工具類
-    └── src/main/resources/
-        └── application.properties
-```
-
-## 快速開始
-
-### 前置需求
-- **Java 21** 或更高版本
-- **Maven 3.6+** 建構工具
-- **Docker & Docker Compose** 容器化環境
-- **MariaDB** 資料庫（或使用 Docker 容器）
-
-### 安裝與執行
-
-1. **克隆此倉庫：**
 ```bash
-git clone https://github.com/SpringMicroservicesCourse/spring-microservices-course.git
-cd "Chapter 15 Spring Cloud Stream"
-```
-
-2. **啟動基礎設施服務：**
-```bash
-# 啟動 Kafka 環境
-cd kafka-waiter-service
-docker-compose up -d
-
-# 啟動 MariaDB（如果沒有本地安裝）
-docker run -d --name mariadb \
-  -e MYSQL_ROOT_PASSWORD=root \
-  -e MYSQL_DATABASE=springbucks \
-  -e MYSQL_USER=springbucks \
-  -e MYSQL_PASSWORD=springbucks \
-  -p 3306:3306 \
-  mariadb:latest
-```
-
-3. **編譯所有專案：**
-```bash
-# 編譯 waiter-service
-cd kafka-waiter-service
-mvn clean compile
-
-# 編譯 barista-service
-cd ../kafka-barista-service
-mvn clean compile
-
-# 編譯 customer-service
-cd ../scheduled-customer-service
-mvn clean compile
-```
-
-4. **依序啟動服務：**
-```bash
-# 終端機 1：啟動 waiter-service (端口 8080)
-cd kafka-waiter-service
-mvn spring-boot:run
-
-# 終端機 2：啟動 barista-service (端口 8070)
-cd kafka-barista-service
-mvn spring-boot:run
-
-# 終端機 3：啟動 customer-service (端口 8090)
+# Clone the repository
+git clone https://github.com/SpringMicroservicesCourse/spring-cloud-stream-kafka
 cd scheduled-customer-service
-mvn spring-boot:run
+
+# Ensure infrastructure is running
+# 1. Consul on port 8500
+# 2. kafka-waiter-service on port 8080
+# 3. kafka-barista-service on port 8070
+
+# Run the application
+./mvnw spring-boot:run
 ```
 
-5. **測試系統功能：**
+### Alternative: Run as JAR
+
 ```bash
-# 查看咖啡菜單
-curl http://localhost:8080/coffee/
+# Build
+./mvnw clean package
 
-# 創建新訂單
-curl -X POST http://localhost:8090/customer/order
-
-# 查看訂單狀態
-curl http://localhost:8080/order/1
+# Run
+java -jar target/scheduled-customer-service-0.0.1-SNAPSHOT.jar
 ```
 
-## 系統架構說明
+## Configuration
 
-### 服務職責分工
+### Application Properties
 
-| 服務 | 端口 | 主要職責 | 關鍵功能 |
-|------|------|----------|----------|
-| **waiter-service** | 8080 | 訂單管理 | 接收訂單、管理菜單、處理支付 |
-| **barista-service** | 8070 | 咖啡製作 | 接收製作請求、更新訂單狀態 |
-| **customer-service** | 8090 | 客戶端 | 下單、監控訂單、自動取餐 |
-
-### 事件流程圖
-
-```mermaid
-sequenceDiagram
-    participant C as Customer Service
-    participant W as Waiter Service
-    participant B as Barista Service
-    participant K as Kafka
-
-    C->>W: 1. 創建訂單 (POST /order)
-    W->>W: 2. 保存訂單 (狀態: INIT)
-    W->>W: 3. 處理支付 (狀態: PAID)
-    W->>K: 4. 發送新訂單事件 (newOrders)
-    K->>B: 5. 通知咖啡師製作
-    B->>B: 6. 製作咖啡 (狀態: BREWING)
-    B->>B: 7. 完成製作 (狀態: BREWED)
-    B->>K: 8. 發送完成事件 (finishedOrders)
-    K->>W: 9. 通知訂單完成
-    C->>C: 10. 定時檢查訂單狀態
-    C->>W: 11. 取餐 (狀態: TAKEN)
-```
-
-## 進階說明
-
-### 環境變數配置
 ```properties
-# 資料庫連接設定
-DB_URL=jdbc:mariadb://localhost:3306/springbucks
-DB_USERNAME=springbucks
-DB_PASSWORD=springbucks
+# Server Configuration
+server.port=8090
 
-# Kafka 連接設定
-KAFKA_BROKERS=localhost:9092
+# Feign Timeout Configuration
+feign.client.config.default.connect-timeout=500
+feign.client.config.default.read-timeout=500
 
-# 服務發現設定
-CONSUL_HOST=localhost
-CONSUL_PORT=8500
-```
+# Consul Service Discovery
+spring.cloud.consul.host=localhost
+spring.cloud.consul.port=8500
+spring.cloud.consul.discovery.prefer-ip-address=true
 
-### 關鍵配置說明
-
-#### Kafka 配置
-```properties
-# Spring Cloud Stream Kafka 綁定器配置
-spring.cloud.stream.kafka.binder.brokers=localhost
-spring.cloud.stream.kafka.binder.defaultBrokerPort=9092
-
-# 函數式編程模型配置
-spring.cloud.function.definition=newOrders
-spring.cloud.stream.bindings.newOrders-in-0.destination=newOrders
-spring.cloud.stream.bindings.newOrders-in-0.group=barista-service
-```
-
-#### 熔斷器配置
-```properties
-# Resilience4j 熔斷器設定
+# Circuit Breaker Configuration (Resilience4j 2.x)
 resilience4j.circuitbreaker.instances.order.failure-rate-threshold=50
-resilience4j.circuitbreaker.instances.order.wait-duration-in-open-state=5000
-resilience4j.circuitbreaker.instances.order.ring-buffer-size-in-closed-state=5
+resilience4j.circuitbreaker.instances.order.wait-duration-in-open-state=5s
+resilience4j.circuitbreaker.instances.order.sliding-window-type=COUNT_BASED
+resilience4j.circuitbreaker.instances.order.sliding-window-size=5
+resilience4j.circuitbreaker.instances.order.minimum-number-of-calls=3
+
+# Bulkhead Configuration
+resilience4j.bulkhead.instances.order.max-concurrent-calls=1
+resilience4j.bulkhead.instances.order.max-wait-duration=50ms
 ```
 
-### 核心程式碼解析
+### Configuration Highlights
 
-#### 事件監聽器 (Barista Service)
-```java
-/**
- * 訂單監聽器 - 處理新訂單並製作咖啡
- * 使用 Spring Cloud Stream 函數式編程模型
- */
-@Component
-@Slf4j
-@Transactional
-public class OrderListener {
-    
-    /**
-     * 處理新訂單的函數式 Bean
-     * 接收新訂單 ID，製作咖啡並發送完成消息
-     */
-    @Bean
-    public Consumer<Long> newOrders() {
-        return id -> {
-            // 查詢訂單資訊
-            CoffeeOrder order = orderRepository.findById(id).orElse(null);
-            if (order == null) {
-                log.warn("Order id {} is NOT valid.", id);
-                throw new IllegalArgumentException("Order ID is INVALID!");
-            }
-            
-            // 製作咖啡並更新狀態
-            order.setState(OrderState.BREWED);
-            order.setBarista(barista);
-            orderRepository.save(order);
-            
-            // 發送完成事件
-            Message<Long> message = MessageBuilder.withPayload(id).build();
-            streamBridge.send(Waiter.FINISHED_ORDERS, message);
-        };
-    }
-}
+| Property | Value | Description |
+|----------|-------|-------------|
+| `failure-rate-threshold` | 50 | Open circuit at 50% failure rate |
+| `wait-duration-in-open-state` | 5s | Wait 5s before half-open attempt |
+| `sliding-window-size` | 5 | Track last 5 calls |
+| `max-concurrent-calls` | 1 | Allow only 1 concurrent call |
+
+### Resilience4j 1.x vs 2.x
+
+⚠️ **Critical Configuration Difference**
+
+| Feature | v1.x (Old) | v2.x (New - Spring Boot 3.x) |
+|---------|------------|------------------------------|
+| **Prefix** | `backends` | `instances` ⚠️ |
+| **Window Size** | `ring-buffer-size-in-closed-state` | `sliding-window-size` ⚠️ |
+| **Window Type** | N/A | `sliding-window-type=COUNT_BASED` ⚠️ Required |
+| **Min Calls** | N/A | `minimum-number-of-calls` ⚠️ Required |
+| **Bulkhead Max** | `max-concurrent-call` | `max-concurrent-calls` ⚠️ Plural |
+| **Bulkhead Wait** | `max-wait-time` | `max-wait-duration` ⚠️ |
+
+**If using v1.x parameters, Circuit Breaker and Bulkhead will NOT trigger!**
+
+## API Endpoints
+
+### Customer Operations
+
+| Method | Path | Description | Example |
+|--------|------|-------------|---------|
+| GET | `/customer/menu` | View coffee menu | `curl http://localhost:8090/customer/menu` |
+| POST | `/customer/order` | Create and pay order | `curl -X POST http://localhost:8090/customer/order` |
+
+### Order Flow
+
+```
+1. POST /customer/order
+   ↓
+2. Feign → waiter-service (create order: INIT)
+   ↓
+3. Feign → waiter-service (pay order: PAID)
+   ↓
+4. Publish OrderWaitingEvent
+   ↓
+5. Scheduled task monitors order state
+   ↓
+6. When state = BREWED → Feign update (TAKEN)
 ```
 
-#### 定時任務 (Customer Service)
+## Key Components
+
+### 1. Scheduled Order Monitoring
+
+**File:** `scheduler/CoffeeOrderScheduler.java`
+
 ```java
-/**
- * 咖啡訂單定時監控器
- * 自動檢查訂單狀態並執行取餐動作
- */
 @Component
 @Slf4j
 public class CoffeeOrderScheduler {
+    @Autowired
+    private CoffeeOrderService coffeeOrderService;
+    private Map<Long, CoffeeOrder> orderMap = new ConcurrentHashMap<>();
     
     /**
-     * 定時檢查訂單狀態 (每秒執行一次)
-     * 當訂單狀態為 BREWED 時自動取餐
+     * Listen for new orders via Application Event
+     */
+    @EventListener
+    public void acceptOrder(OrderWaitingEvent event) {
+        orderMap.put(event.getOrder().getId(), event.getOrder());
+    }
+    
+    /**
+     * Poll order status every second
+     * Auto-pickup when state = BREWED
      */
     @Scheduled(fixedRate = 1000)
     public void waitForCoffee() {
         if (orderMap.isEmpty()) {
             return;
         }
-        
         log.info("I'm waiting for my coffee.");
         orderMap.values().stream()
                 .map(o -> coffeeOrderService.getOrder(o.getId()))
                 .filter(o -> OrderState.BREWED == o.getState())
                 .forEach(o -> {
                     log.info("Order [{}] is READY, I'll take it.", o);
-                    // 更新訂單狀態為已取餐
                     coffeeOrderService.updateState(o.getId(),
                             OrderStateRequest.builder()
                                     .state(OrderState.TAKEN).build());
@@ -308,94 +195,457 @@ public class CoffeeOrderScheduler {
 }
 ```
 
-## API 文件
+**Key Features:**
+- **Event-Driven**: Decouples controller from scheduler via events
+- **Thread-Safe**: Uses `ConcurrentHashMap` for concurrent access
+- **Auto-Cleanup**: Removes orders after pickup to prevent memory leaks
+- **Polling Strategy**: Checks every 1 second (configurable)
 
-### Waiter Service API
+### 2. Controller with Resilience Patterns
 
-| 方法 | 路徑 | 說明 | 範例 |
-|------|------|------|------|
-| GET | `/coffee/` | 取得咖啡菜單 | `curl http://localhost:8080/coffee/` |
-| POST | `/order/` | 創建新訂單 | `curl -X POST http://localhost:8080/order/ -H "Content-Type: application/json" -d '{"customer":"張三","items":["拿鐵","美式"]}'` |
-| GET | `/order/{id}` | 查詢訂單狀態 | `curl http://localhost:8080/order/1` |
-| PUT | `/order/{id}` | 更新訂單狀態 | `curl -X PUT http://localhost:8080/order/1 -H "Content-Type: application/json" -d '{"state":"PAID"}'` |
+**File:** `controller/CustomerController.java`
 
-### Customer Service API
+```java
+@RestController
+@RequestMapping("/customer")
+@Slf4j
+public class CustomerController implements ApplicationEventPublisherAware {
+    private ApplicationEventPublisher applicationEventPublisher;
+    
+    @PostMapping("/order")
+    @CircuitBreaker(name = "order")  // ← Circuit breaker protection
+    @Bulkhead(name = "order")        // ← Concurrency limiting
+    public CoffeeOrder createAndPayOrder() {
+        // Create order via Feign
+        NewOrderRequest orderRequest = NewOrderRequest.builder()
+                .customer("Ray Chu")
+                .items(Arrays.asList("capuccino"))
+                .build();
+        CoffeeOrder order = coffeeOrderService.create(orderRequest);
+        
+        // Pay order via Feign
+        order = coffeeOrderService.updateState(order.getId(),
+                OrderStateRequest.builder().state(OrderState.PAID).build());
+        
+        // Publish event for scheduler
+        applicationEventPublisher.publishEvent(new OrderWaitingEvent(order));
+        return order;
+    }
+    
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+        this.applicationEventPublisher = publisher;
+    }
+}
+```
 
-| 方法 | 路徑 | 說明 | 範例 |
-|------|------|------|------|
-| GET | `/customer/menu` | 查看菜單 | `curl http://localhost:8090/customer/menu` |
-| POST | `/customer/order` | 下單並支付 | `curl -X POST http://localhost:8090/customer/order` |
+**Resilience Features:**
+- **Circuit Breaker**: Prevents cascading failures
+- **Bulkhead**: Limits concurrent calls to protect resources
+- **Programmatic Fallback**: Uses Vavr `Try` for error recovery
 
-## 監控與管理
+### 3. Application Event
 
-### 健康檢查端點
+**File:** `support/OrderWaitingEvent.java`
+
+```java
+@Data
+public class OrderWaitingEvent extends ApplicationEvent {
+    private CoffeeOrder order;
+    
+    public OrderWaitingEvent(CoffeeOrder order) {
+        super(order);
+        this.order = order;
+    }
+}
+```
+
+**Why Application Events?**
+- ✅ **In-Memory**: Fast, no network overhead
+- ✅ **Decoupling**: Controller doesn't know about scheduler
+- ✅ **Simple**: Built-in Spring feature
+- ⚠️ **Not Persistent**: Events lost on restart (use Kafka for durability)
+
+## Resilience Patterns Explained
+
+### Circuit Breaker States
+
+```
+CLOSED ──(50% failures)──> OPEN ──(5s wait)──> HALF_OPEN
+  ↑                          │                      │
+  └─────(success)────────────┴──(success)───────────┘
+                                   │
+                          (failure)└─> OPEN
+```
+
+**Configuration:**
+- `sliding-window-size=5`: Track last 5 calls
+- `failure-rate-threshold=50`: Open at 50% failure
+- `minimum-number-of-calls=3`: Need 3 calls before calculation
+- `wait-duration-in-open-state=5s`: Wait 5s before retry
+
+### Bulkhead Pattern
+
+```
+Request 1 ──> [SLOT 1: OCCUPIED] ──> Processing
+Request 2 ──> [Queue: 50ms wait] ──> Rejected or Accepted
+Request 3 ──> [Queue: 50ms wait] ──> Rejected (timeout)
+```
+
+**Configuration:**
+- `max-concurrent-calls=1`: Only 1 concurrent call allowed
+- `max-wait-duration=50ms`: Max wait time in queue
+
+## Monitoring
+
+### Circuit Breaker State
+
 ```bash
-# 檢查服務健康狀態
-curl http://localhost:8080/actuator/health
-curl http://localhost:8070/actuator/health
 curl http://localhost:8090/actuator/health
-
-# 查看應用資訊
-curl http://localhost:8080/actuator/info
 ```
 
-### 指標監控
+**Response:**
+```json
+{
+  "status": "UP",
+  "components": {
+    "circuitBreakers": {
+      "status": "UP",
+      "details": {
+        "order": {
+          "status": "UP",
+          "state": "CLOSED",
+          "failureRate": "0.0%"
+        }
+      }
+    }
+  }
+}
+```
+
+### Metrics
+
 ```bash
-# 查看應用指標
-curl http://localhost:8080/actuator/metrics
-curl http://localhost:8080/actuator/metrics/jvm.memory.used
+# Circuit breaker calls
+curl http://localhost:8090/actuator/metrics/resilience4j.circuitbreaker.calls
+
+# Bulkhead available concurrent calls
+curl http://localhost:8090/actuator/metrics/resilience4j.bulkhead.available.concurrent.calls
 ```
 
-## 參考資源
+## Best Practices Demonstrated
 
-- [Spring Cloud Stream 官方文件](https://spring.io/projects/spring-cloud-stream)
-- [Apache Kafka 官方文件](https://kafka.apache.org/documentation/)
-- [Resilience4j 官方文件](https://resilience4j.readme.io/)
-- [Spring Boot Actuator 監控指南](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html)
+1. **Task Scheduling**: Use `@Scheduled` for periodic operations
+2. **Event Mechanism**: Internal decoupling with Spring Events
+3. **Resilience Patterns**: Circuit Breaker + Bulkhead for stability
+4. **HTTP Client Tuning**: Custom connection pool configuration
+5. **Service Discovery**: Dynamic endpoint resolution via Consul
+6. **Declarative HTTP**: Clean API calls with OpenFeign
+7. **AOP Support**: Enable with `@EnableAspectJAutoProxy` for Resilience4j annotations
 
-## 注意事項與最佳實踐
+## Development vs Production
 
-### ⚠️ 重要提醒
+### Development (Current Configuration)
 
-| 項目 | 說明 | 建議做法 |
-|------|------|----------|
-| **資料庫連線** | MariaDB 連線設定 | 使用連線池，設定適當的超時時間 |
-| **Kafka 配置** | 訊息佇列設定 | 根據業務需求調整分區數和複製因子 |
-| **服務發現** | Consul 註冊設定 | 確保服務名稱唯一，避免衝突 |
-| **熔斷器** | 故障處理機制 | 根據實際業務調整失敗閾值和恢復時間 |
+```properties
+# Short timeouts for quick feedback
+feign.client.config.default.connect-timeout=500
+feign.client.config.default.read-timeout=500
 
-### 🔒 最佳實踐指南
+# Aggressive bulkhead for testing
+resilience4j.bulkhead.instances.order.max-concurrent-calls=1
+```
 
-- **事件設計**：確保事件結構穩定，避免破壞性變更
-- **錯誤處理**：實作完整的異常處理和重試機制
-- **監控告警**：設定關鍵指標的監控和告警
-- **資料一致性**：使用分散式事務或補償機制確保資料一致性
-- **效能優化**：合理設定 Kafka 批次大小和消費者組配置
+### Production (Recommended)
 
-### 🚀 擴展建議
+```properties
+# Longer timeouts for stability
+feign.client.config.default.connect-timeout=3000
+feign.client.config.default.read-timeout=10000
 
-- **水平擴展**：可以啟動多個 barista-service 實例來提高處理能力
-- **訊息持久化**：根據業務需求設定適當的訊息保留時間
-- **監控整合**：整合 Prometheus + Grafana 進行更詳細的監控
-- **日誌聚合**：使用 ELK Stack 進行集中式日誌管理
+# Relaxed bulkhead for throughput
+resilience4j.bulkhead.instances.order.max-concurrent-calls=10
+resilience4j.bulkhead.instances.order.max-wait-duration=5s
 
-## 授權說明
+# Circuit breaker tuning
+resilience4j.circuitbreaker.instances.order.sliding-window-size=100
+resilience4j.circuitbreaker.instances.order.minimum-number-of-calls=20
+```
 
-本專案採用 MIT 授權條款，詳見 LICENSE 檔案。
+## Testing
 
-## 關於我們
+```bash
+# Run unit tests
+./mvnw test
 
-我們主要專注在敏捷專案管理、物聯網（IoT）應用開發和領域驅動設計（DDD）。喜歡把先進技術和實務經驗結合，打造好用又靈活的軟體解決方案。
+# Integration test
+./mvnw verify
 
-## 聯繫我們
+# End-to-end test
+curl -X POST http://localhost:8090/customer/order
+```
 
-- **FB 粉絲頁**：[風清雲談 | Facebook](https://www.facebook.com/profile.php?id=61576838896062)
-- **LinkedIn**：[linkedin.com/in/chu-kuo-lung](https://www.linkedin.com/in/chu-kuo-lung)
-- **YouTube 頻道**：[雲談風清 - YouTube](https://www.youtube.com/channel/UCXDqLTdCMiCJ1j8xGRfwEig)
-- **風清雲談 部落格**：[風清雲談](https://blog.fengqing.tw/)
-- **電子郵件**：[fengqing.tw@gmail.com](mailto:fengqing.tw@gmail.com)
+## Troubleshooting
+
+### Circuit Breaker Not Triggering
+
+**Check:**
+1. ✅ Using `instances` (not `backends`) in configuration
+2. ✅ `sliding-window-type=COUNT_BASED` is set
+3. ✅ `minimum-number-of-calls` is configured
+4. ✅ `@EnableAspectJAutoProxy` annotation is present
+5. ✅ Resilience4j dependency is `resilience4j-spring-boot3`
+
+### Bulkhead Not Working
+
+**Check:**
+1. ✅ Using `max-concurrent-calls` (plural, not singular)
+2. ✅ Using `max-wait-duration` (not `max-wait-time`)
+3. ✅ Configuration prefix is `instances` (not `backends`)
+
+### Scheduled Task Not Running
+
+**Check:**
+1. ✅ `@EnableScheduling` annotation is present
+2. ✅ `orderMap` is not empty (publish event first)
+3. ✅ No exceptions in logs
+
+### Feign Client Connection Failed
+
+**Check:**
+1. ✅ Consul is running: `docker ps | grep consul`
+2. ✅ waiter-service is registered in Consul
+3. ✅ Service name matches: `waiter-service`
+
+## Workflow Explained
+
+### Complete Order Processing Flow
+
+```
+1. Customer Controller
+   │
+   ├─> Feign call: Create Order (INIT)
+   ├─> Feign call: Pay Order (PAID)
+   └─> Publish OrderWaitingEvent
+        │
+        ├─> Scheduler @EventListener adds to orderMap
+        │
+        └─> @Scheduled task (every 1s)
+             │
+             ├─> Query order status via Feign
+             ├─> Filter: state == BREWED?
+             └─> Yes → Update to TAKEN → Remove from map
+```
+
+### Application Event vs Kafka
+
+| Feature | Application Event | Kafka Message |
+|---------|-------------------|---------------|
+| **Scope** | In-process | Cross-service |
+| **Durability** | Memory (lost on restart) | Persistent |
+| **Speed** | Very fast | Network latency |
+| **Use Case** | Internal decoupling | Microservice communication |
+
+## Key Components
+
+### 1. Main Application Class
+
+**File:** `CustomerServiceApplication.java`
+
+```java
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableFeignClients
+@EnableAspectJAutoProxy  // ⚠️ Required for Circuit Breaker annotations
+@EnableScheduling        // ⚠️ Required for @Scheduled tasks
+public class CustomerServiceApplication {
+    
+    @Bean
+    public CloseableHttpClient httpClient() {
+        return HttpClients.custom()
+                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                        .setMaxConnTotal(200)
+                        .setMaxConnPerRoute(20)
+                        .build())
+                .evictIdleConnections(TimeValue.ofSeconds(30))
+                .disableAutomaticRetries()
+                .setKeepAliveStrategy(new CustomConnectionKeepAliveStrategy())
+                .build();
+    }
+}
+```
+
+**Critical Annotations:**
+- `@EnableAspectJAutoProxy`: Required for Resilience4j annotation-based features
+- `@EnableScheduling`: Activates `@Scheduled` task support
+- `@EnableFeignClients`: Scans for Feign client interfaces
+
+### 2. Feign Client Interfaces
+
+**File:** `integration/CoffeeOrderService.java`
+
+```java
+@FeignClient(name = "waiter-service", contextId = "coffeeOrder")
+public interface CoffeeOrderService {
+    @GetMapping("/order/{id}")
+    CoffeeOrder getOrder(@PathVariable("id") Long id);
+    
+    @PostMapping(path = "/order/", consumes = MediaType.APPLICATION_JSON_VALUE)
+    CoffeeOrder create(@RequestBody NewOrderRequest newOrder);
+    
+    @PutMapping("/order/{id}")
+    CoffeeOrder updateState(@PathVariable("id") Long id,
+                            @RequestBody OrderStateRequest orderState);
+}
+```
+
+**Design Benefits:**
+- ✅ **Declarative**: No manual HTTP client code
+- ✅ **Type-Safe**: Compile-time validation
+- ✅ **Integrated**: Works with Consul discovery
+- ✅ **Resilient**: Supports timeout and retry configuration
+
+### 3. Custom Connection Keep-Alive Strategy
+
+**File:** `support/CustomConnectionKeepAliveStrategy.java`
+
+```java
+public class CustomConnectionKeepAliveStrategy implements ConnectionKeepAliveStrategy {
+    private final long DEFAULT_SECONDS = 30;
+    
+    @Override
+    public TimeValue getKeepAliveDuration(HttpResponse response, HttpContext context) {
+        return Arrays.stream(response.getHeaders("Connection"))
+                .filter(h -> StringUtils.equalsIgnoreCase(h.getName(), "timeout"))
+                .findFirst()
+                .map(h -> NumberUtils.toLong(h.getValue(), DEFAULT_SECONDS))
+                .orElse(DEFAULT_SECONDS) * 1000;
+    }
+}
+```
+
+**Why Custom Strategy?**
+- Dynamically adjust keep-alive based on server response
+- Prevent connection exhaustion
+- Optimize resource usage
+
+## Scheduled Task Deep Dive
+
+### Fixed Rate vs Fixed Delay
+
+```java
+// Fixed Rate: Execute every 1000ms regardless of execution time
+@Scheduled(fixedRate = 1000)
+public void taskA() { }
+
+// Fixed Delay: Wait 1000ms after previous execution completes
+@Scheduled(fixedDelay = 1000)
+public void taskB() { }
+
+// Initial Delay: Wait 5s before first execution
+@Scheduled(initialDelay = 5000, fixedRate = 1000)
+public void taskC() { }
+
+// Cron Expression: Execute at specific times
+@Scheduled(cron = "0 0 12 * * ?")  // Every day at noon
+public void taskD() { }
+```
+
+## Monitoring
+
+### Health Check
+
+```bash
+curl http://localhost:8090/actuator/health
+```
+
+### Circuit Breaker Events
+
+```bash
+# Check circuit breaker metrics
+curl http://localhost:8090/actuator/metrics/resilience4j.circuitbreaker.state
+
+# Output:
+# 0 = CLOSED (normal)
+# 1 = OPEN (blocking calls)
+# 2 = HALF_OPEN (testing recovery)
+```
+
+### Consul Service Status
+
+Visit: `http://localhost:8500/ui/dc1/services/customer-service`
+
+## Best Practices Demonstrated
+
+1. **Scheduled Tasks**: Use thread pool to prevent blocking
+2. **Event Mechanism**: Decouple modules with Application Events
+3. **Circuit Breaker**: Prevent cascading failures
+4. **Bulkhead**: Isolate resources for stability
+5. **Connection Pooling**: Reuse HTTP connections efficiently
+6. **Service Discovery**: Dynamic endpoint resolution
+7. **Graceful Shutdown**: Clean up resources with `@PreDestroy`
+
+## Common Issues & Solutions
+
+### Issue: Scheduled Task Doesn't Run
+
+**Solutions:**
+1. Add `@EnableScheduling` to main application class
+2. Ensure method is in Spring-managed bean (`@Component`)
+3. Check no exceptions thrown during execution
+
+### Issue: Circuit Breaker Always Closed
+
+**Solutions:**
+1. Verify `minimum-number-of-calls` threshold is met
+2. Check failure rate threshold (need >= 50% failures)
+3. Ensure `@EnableAspectJAutoProxy` is present
+
+### Issue: Feign Timeout
+
+**Solutions:**
+1. Increase timeout values in `application.properties`
+2. Check target service health
+3. Verify Consul registration
+
+## Extended Practice
+
+**Suggested Enhancements:**
+
+1. Add WebSocket for real-time order updates
+2. Implement retry mechanism with exponential backoff
+3. Create admin dashboard for order monitoring
+4. Add custom fallback methods for circuit breaker
+5. Implement async scheduled tasks with thread pool
+6. Add Prometheus metrics export
+7. Create integration tests with WireMock
+
+## References
+
+- [Spring Task Scheduling](https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#scheduling)
+- [Spring Application Events](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#context-functionality-events)
+- [OpenFeign Documentation](https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/)
+- [Resilience4j Spring Boot](https://resilience4j.readme.io/docs/getting-started-3)
+- [Consul Service Discovery](https://www.consul.io/docs)
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## About Us
+
+我們主要專注在敏捷專案管理、物聯網（IoT）應用開發和領域驅動設計（DDD）。喜歡把先進技術和實務經驗結合，打造好用又靈活的軟體解決方案。近來也積極結合 AI 技術，推動自動化工作流，讓開發與運維更有效率、更智慧。持續學習與分享，希望能一起推動軟體開發的創新和進步。
+
+## Contact
+
+**風清雲談** - 專注於敏捷專案管理、物聯網（IoT）應用開發和領域驅動設計（DDD）。
+
+- 🌐 官方網站：[風清雲談部落格](https://blog.fengqing.tw/)
+- 📘 Facebook：[風清雲談粉絲頁](https://www.facebook.com/profile.php?id=61576838896062)
+- 💼 LinkedIn：[Chu Kuo-Lung](https://www.linkedin.com/in/chu-kuo-lung)
+- 📺 YouTube：[雲談風清頻道](https://www.youtube.com/channel/UCXDqLTdCMiCJ1j8xGRfwEig)
+- 📧 Email：[fengqing.tw@gmail.com](mailto:fengqing.tw@gmail.com)
 
 ---
 
-**📅 最後更新：2025年9月**  
-**👨‍💻 維護者：風清雲談團隊**
+**⭐ 如果這個專案對您有幫助，歡迎給個 Star！**
